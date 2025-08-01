@@ -351,6 +351,7 @@ class ClassroomBookingSystem {
         });
     }
 
+
     closeModal() {
         document.getElementById('booking-modal').classList.remove('active');
         this.currentBooking = null;

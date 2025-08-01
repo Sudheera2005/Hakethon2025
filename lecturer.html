@@ -21,7 +21,16 @@
                     <div class="avatar">L</div>
                 </div>
             </div>
+            <button id="logout-btn" class="btn btn-danger" style="margin-left:auto;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </header>
+
+        <script>
+            document.getElementById('logout-btn').onclick = function() {
+                window.location.href = 'index.html';
+            };
+        </script>
 
         <!-- Main Content -->
         <main class="main-content container">
