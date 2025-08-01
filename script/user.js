@@ -92,7 +92,7 @@ class ClassroomBookingSystem {
         const hasPendingConflict = pendingRequests.some(request => 
             request.roomId === roomId && 
             request.date === date &&
-            !(endTime <= request.startTime || startTime >= request.endTime)
+            !(endTime >= request.startTime || startTime <= request.endTime)
         );
         
         return !hasApprovedConflict && !hasPendingConflict;
@@ -204,28 +204,49 @@ class ClassroomBookingSystem {
         const endTime = document.getElementById('end-time').value;
         const purpose = document.getElementById('booking-purpose').value;
 
-        // Validate
+        // Validate required fields
         if (!date || !startTime || !endTime || !purpose) {
             this.showNotification('Please fill in all required fields', 'error');
             return;
         }
 
-        if (startTime >= endTime) {
+        // Convert times to Date objects for accurate comparison
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const [endHour, endMinute] = endTime.split(':').map(Number);
+
+        const startInMinutes = startHour * 60 + startMinute;
+        const endInMinutes = endHour * 60 + endMinute;
+
+        // Check start < end
+        if (startInMinutes >= endInMinutes) {
             this.showNotification('End time must be after start time', 'error');
             return;
         }
-        if (startTime-endTime > 4){
+
+        // Check max 4 hours
+        if (endInMinutes - startInMinutes > 240) {
             this.showNotification('Booking duration cannot exceed 4 hours', 'error');
             return;
         }
-        
-        const now = new Date().getHours()
-        const stime = startTime.split(':')[0];
-        if (stime - now<=1){
-            this.showNotification('Booking must be made at least 1 hour in advance', 'error');
-            return;     
+
+        // Check if booking is at least 1 hour ahead if today
+        const today = new Date();
+        const bookingDate = new Date(date + 'T00:00:00'); // Midnight of selected day
+
+        // Check if booking date is today
+        if (
+            bookingDate.getFullYear() === today.getFullYear() &&
+            bookingDate.getMonth() === today.getMonth() &&
+            bookingDate.getDate() === today.getDate()
+        ) {
+            const currentMinutes = today.getHours() * 60 + today.getMinutes();
+            if (startInMinutes - currentMinutes < 60) {
+                this.showNotification('Booking must be made at least 1 hour in advance', 'error');
+                return;
+            }
         }
-        alert(stime - now)
+
+        // ✅ Passed all checks, proceed with booking
         // Check availability again
         if (!this.isRoomAvailable(this.currentBooking.roomId, date, startTime, endTime)) {
             this.showNotification('This room is no longer available', 'error');

@@ -451,6 +451,7 @@ renderSemesterAssignments() {
         this.currentSemesterEditId = null;
     }
 
+    // ...existing code...
     saveSemesterAssignment() {
         const roomId = document.getElementById('semester-room').value;
         const lecturer = document.getElementById('semester-lecturer').value.trim();
@@ -460,18 +461,18 @@ renderSemesterAssignments() {
         const duration = document.getElementById('semester-duration').value;
         const startDate = document.getElementById('semester-start').value;
         const endDate = document.getElementById('semester-end').value;
-        
+
         // Basic validation
         if (!roomId || !lecturer || !course || !day || !time || !duration || !startDate || !endDate) {
             this.showToast('Please fill all required fields', 'error');
             return;
         }
-        
+
         if (new Date(startDate) > new Date(endDate)) {
             this.showToast('End date must be after start date', 'error');
             return;
         }
-        
+
         const room = this.rooms.find(r => r.id === roomId);
         if (!room) {
             this.showToast('Selected room not found', 'error');
@@ -482,7 +483,34 @@ renderSemesterAssignments() {
             this.showToast('Duration must be between 1 and 4 hours', 'error');
             return;
         }
-                
+
+        // --- Overlap check ---
+        const newStart = new Date(startDate);
+        const newEnd = new Date(endDate);
+        const newTime = time;
+        const newDay = day;
+
+        const isOverlap = this.semesterAssignments.some(a => {
+            if (
+                a.roomId === roomId &&
+                a.id !== this.currentSemesterEditId && // allow editing same assignment
+                a.day === newDay &&
+                a.time === newTime &&
+                (
+                    (new Date(a.startDate) <= newEnd && new Date(a.endDate) >= newStart)
+                )
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        if (isOverlap) {
+            this.showToast('This room is already assigned for the selected day and time in the given date range.', 'error');
+            return;
+        }
+        // --- End overlap check ---
+
         const assignmentData = {
             roomId,
             roomName: room.name,
@@ -494,7 +522,7 @@ renderSemesterAssignments() {
             startDate,
             endDate
         };
-        
+
         if (this.currentSemesterEditId) {
             // Update existing assignment
             const index = this.semesterAssignments.findIndex(a => a.id === this.currentSemesterEditId);
@@ -509,11 +537,12 @@ renderSemesterAssignments() {
             this.semesterAssignments.push(assignmentData);
             this.showToast('Assignment added successfully', 'success');
         }
-                
+
         this.saveAllData();
         this.renderSemesterAssignments();
         this.closeSemesterAssignmentModal();
     }
+// ...existing code...
 
     renderSemesterAssignments() {
         const tbody = document.getElementById('semester-tbody');
@@ -551,6 +580,7 @@ renderSemesterAssignments() {
             tbody.appendChild(row);
         });
     }
+
 
     deleteSemesterAssignment(id) {
         if (confirm('Are you sure you want to delete this semester assignment?')) {
