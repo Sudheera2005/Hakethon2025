@@ -218,7 +218,14 @@ class ClassroomBookingSystem {
             this.showNotification('Booking duration cannot exceed 4 hours', 'error');
             return;
         }
-
+        
+        const now = new Date().getHours()
+        const stime = startTime.split(':')[0];
+        if (stime - now<=1){
+            this.showNotification('Booking must be made at least 1 hour in advance', 'error');
+            return;     
+        }
+        alert(stime - now)
         // Check availability again
         if (!this.isRoomAvailable(this.currentBooking.roomId, date, startTime, endTime)) {
             this.showNotification('This room is no longer available', 'error');

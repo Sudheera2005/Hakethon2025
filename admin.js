@@ -404,7 +404,48 @@ class AdminDashboard {
             document.getElementById('semester-assignment-form').reset();
         }
     }
+renderSemesterAssignments() {
+    const tbody = document.getElementById('semester-tbody');
+    tbody.innerHTML = '';
 
+    // Only show assignments whose end date is today or in the future
+    const today = new Date();
+    const activeAssignments = this.semesterAssignments.filter(assignment => {
+        return new Date(assignment.endDate) >= today;
+    });
+
+    if (activeAssignments.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; color: #666;">No semester assignments found</td>
+            </tr>
+        `;
+        return;
+    }
+
+    activeAssignments.forEach(assignment => {
+        const room = this.rooms.find(r => r.id === assignment.roomId) || {};
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${room.name || 'N/A'}</td>
+            <td>${assignment.lecturer}</td>
+            <td>${assignment.course}</td>
+            <td>${assignment.day}</td>
+            <td>${assignment.time}</td>
+            <td>${assignment.duration} hrs</td>
+            <td>${new Date(assignment.startDate).toLocaleDateString()} - ${new Date(assignment.endDate).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-edit" onclick="adminDashboard.openSemesterAssignmentModal('${assignment.id}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-danger" onclick="adminDashboard.deleteSemesterAssignment('${assignment.id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
     closeSemesterAssignmentModal() {
         document.getElementById('semester-assignment-modal').classList.remove('active');
         this.currentSemesterEditId = null;
