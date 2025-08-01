@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>APIIT Classroom Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fbfd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      margin-top: 1rem;
+    }
+
+    .logo {
+      background: linear-gradient(to right, #001f3f, #4e8df5);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 1rem;
+    }
+
+    .logo::before {
+      content: '🎓';
+      font-size: 28px;
+      color: white;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #4e8df5;
+      font-weight: 500;
+      margin-top: 0.2rem;
+    }
+
+    .desc {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+
+    .card h2 {
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      color: #111827;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #f9fafb;
+      
+      max-width: 360px; /* Optional, limits width */
+      display: block;
+      margin: 1rem auto 0; /* Centers the input and gives spacing */
+
+
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(to right, #001f3f, #4e8df5);
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    #error-message {
+      color: red;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo"></div>
+    <h1>APIIT Classroom</h1>
+    <p class="subtitle">Booking System</p>
+    <p class="desc">Sign in to manage classroom reservations</p>
+
+    <div class="card">
+      <h2>Welcome Back</h2>
+      <p>Choose your role and enter your credentials</p>
+
+      <select id="role">
+        <option disabled selected>Select your role</option>
+        <option value="lecturer">Lecturer</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <input type="text" id="username" placeholder="Enter your username" required />
+      <input type="password" id="password" placeholder="Enter your password" required />
+      <button onclick="login()">Sign In to Dashboard</button>
+
+      <p id="error-message"></p>
+    </div>
+  </div>
+
+  <script>
+    if (!localStorage.getItem('users')) {
+      const defaultUsers = [
+        { username: 'lecturer1', password: 'lecturer123', role: 'lecturer', name: 'Dr. EE' },
+        { username: 'admin1', password: 'admin123', role: 'admin', name: 'Admin User' }
+      ];
+      localStorage.setItem('users', JSON.stringify(defaultUsers));
+    }
+
+    if (!localStorage.getItem('classrooms')) {
+      const defaultClassrooms = [
+        { id: '101', name: 'Room 101', capacity: 30 },
+        { id: '102', name: 'Room 102', capacity: 40 },
+        { id: '201', name: 'Room 201', capacity: 50 }
+      ];
+      localStorage.setItem('classrooms', JSON.stringify(defaultClassrooms));
+    }
+
+    if (!localStorage.getItem('schedules')) {
+      localStorage.setItem('schedules', JSON.stringify([]));
+    }
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      const errorMessage = document.getElementById('error-message');
+
+      const users = JSON.parse(localStorage.getItem('users'));
+      const user = users.find(u => u.username === username && u.password === password && u.role === role);
+
+      if (user) {
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+        if (role === 'lecturer') {
+        //   localStorage:setItem("LoggedUser", JSON.stringify(username))
+          window.location.href = 'lecturer.html';
+        } else if (role === 'admin') {
+          window.location.href = 'admin.html';
+        }
+      } else {
+        errorMessage.textContent = 'Invalid username, password, or role';
+      }
+    }
+  </script>
+</body>
+</html>
